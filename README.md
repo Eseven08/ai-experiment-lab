@@ -1,79 +1,71 @@
-# 🤖 AI 实验小工坊（ai-experiment-lab）
+# AI Experiment Lab (ai-experiment-lab)
 
-一个**不依赖任何第三方库**（只用 Python 标准库）的 AI 入门实验集合。
-每个脚本都是一个可以独立运行的"小实验"，代码逐行注释，
-适合零基础的同学理解神经网络、机器学习的基本原理。
+A collection of AI intro experiments built on **zero third-party dependencies** (Python standard library only). Every script is a standalone, runnable experiment with line-by-line comments — perfect for beginners who want to understand neural networks and machine learning from first principles.
 
-## 环境要求
+## Requirements
 
 - Python 3.8+
-- 无需安装任何第三方库（不需要 numpy / pytorch / tensorflow）
+- No third-party packages needed (no numpy / pytorch / tensorflow)
 
-## 快速开始
+## Quick Start
 
 ```bash
-# 依次运行三个实验
-python perceptron.py    # 实验一：单层感知机
-python nn_xor.py        # 实验二：从零实现的两层神经网络
-python markov_text.py   # 实验三：马尔可夫链文本生成
+# Run the three experiments in order
+python perceptron.py    # Experiment 1: The Perceptron
+python nn_xor.py        # Experiment 2: A Two-Layer Neural Network From Scratch
+python markov_text.py   # Experiment 3: Markov Chain Text Generation
 ```
 
-## 实验列表
+## Experiments
 
-| 文件 | 实验内容 | 你将看到 |
+| File | Experiment | What You'll See |
 | --- | --- | --- |
-| `perceptron.py` | 单层感知机学习逻辑门 | AND / OR 能学会，XOR 学不会（线性不可分） |
-| `nn_xor.py` | 从零手写两层神经网络 | 加上隐藏层后成功解决 XOR，损失下降曲线 |
-| `markov_text.py` | 马尔可夫链文本生成 | 用统计规律"拼"出看起来像人话的中文 |
+| `perceptron.py` | A single-layer perceptron learning logic gates | AND / OR are learnable; XOR is not (linearly inseparable) |
+| `nn_xor.py` | A two-layer neural network written from scratch | A hidden layer solves XOR; watch the loss curve drop |
+| `markov_text.py` | Markov chain text generation | Statistically "stitched" plausible-looking English text |
 
-## 每个实验在讲什么
+## What Each Experiment Is About
 
-### 1. 感知机（perceptron.py）
+### 1. The Perceptron (perceptron.py)
 
-感知机是 1957 年提出的最早的神经网络模型。它把输入加权求和，
-超过阈值就输出 1，否则输出 0。它只能解决**线性可分**问题：
+The perceptron is the earliest neural network model, proposed by Rosenblatt in 1957. It sums up weighted inputs and outputs 1 when the sum exceeds a threshold, otherwise 0. It can only solve **linearly separable** problems:
 
-- AND（与门）、OR（或门）：可以用一条直线分开 → 能学会
-- XOR（异或）：任何一条直线都分不开 → 学不会
+- AND / OR: separable by a straight line → learnable
+- XOR: no single straight line can separate it → unlearnable
 
-这个"学不会"正是当年神经网络陷入低谷的原因之一，
-也催生了"多层神经网络"的诞生。
+That failure is one of the reasons neural network research stalled for years — and it directly motivated the invention of multi-layer networks.
 
-### 2. 两层神经网络（nn_xor.py）
+### 2. Two-Layer Neural Network (nn_xor.py)
 
-在感知机的基础上加一个**隐藏层**，网络就能解决 XOR 问题了。
-脚本手写了神经网络的核心三步：
+Adding a **hidden layer** on top of the perceptron lets the network solve XOR. The script hand-writes the three core steps of a neural network:
 
-1. **前向传播**：输入 → 隐藏层（tanh 激活）→ 输出层（sigmoid 激活）
-2. **反向传播**：从输出误差反推每一层权重的"责任"
-3. **梯度下降**：按误差方向微调每个权重，让损失越来越小
+1. **Forward propagation**: input → hidden layer (tanh activation) → output layer (sigmoid activation)
+2. **Backpropagation**: propagate the output error backward to attribute blame to each weight
+3. **Gradient descent**: adjust every weight against the error so the loss keeps shrinking
 
-运行后你会看到损失从高位一路下降，最终 4 个样本全部预测正确。
+After running, you'll see the loss fall from a high value to near zero, and all 4 samples classified correctly.
 
-### 3. 马尔可夫链（markov_text.py）
+### 3. Markov Chains (markov_text.py)
 
-统计语料中"每个词后面通常跟着什么词"，建立一张转移表，
-生成时按概率随机接词。虽然模型"不懂"语法和语义，
-但二阶马尔可夫链生成的句子已经相当连贯。
-这种 n-gram 统计模型正是大语言模型最原始的雏形。
+The script counts, from a corpus, "which word typically follows which", builds a transition table, then stitches words together by probability. The model doesn't "understand" grammar or semantics — yet a second-order Markov chain already produces surprisingly coherent sentences. These n-gram statistical models are the primitive ancestors of today's large language models.
 
-## 项目结构
+## Project Structure
 
 ```
 ai-experiment-lab/
-├── README.md          # 本文件
-├── perceptron.py      # 实验一：感知机
-├── nn_xor.py          # 实验二：两层神经网络
-└── markov_text.py     # 实验三：马尔可夫文本生成
+├── README.md          # This file
+├── perceptron.py      # Experiment 1: The Perceptron
+├── nn_xor.py          # Experiment 2: Two-Layer Neural Network
+└── markov_text.py     # Experiment 3: Markov Text Generation
 ```
 
-## 下一步可以怎么玩
+## Ideas to Explore Next
 
-- 把 `markov_text.py` 里的语料换成你喜欢的文章（歌词、小说、新闻）
-- 把 `nn_xor.py` 的网络结构改成 `2-8-1`、`2-16-1`，观察训练速度变化
-- 给神经网络加一层，看看"深度"对表达能力的影响
-- 学完这些，再上手 numpy + PyTorch 就会轻松很多
+- Replace the corpus in `markov_text.py` with your own text (lyrics, novels, news)
+- Change the network shape in `nn_xor.py` to `2-8-1` or `2-16-1` and observe training speed
+- Add another hidden layer and see how "depth" affects expressiveness
+- After these, moving on to numpy + PyTorch will feel much easier
 
-## 许可证
+## License
 
 MIT License

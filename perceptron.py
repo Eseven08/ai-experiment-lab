@@ -1,104 +1,111 @@
 # -*- coding: utf-8 -*-
 """
-perceptron.py —— 从零实现的感知机（Perceptron）学习算法
+perceptron.py — A perceptron learning algorithm implemented from scratch
 
-感知机是最早的神经网络模型（1957 年 Rosenblatt 提出），
-只能解决"线性可分"的问题（能用一条直线/一个平面分开的数据）。
+The perceptron is the earliest neural network model (proposed by Rosenblatt
+in 1957). It can only solve "linearly separable" problems — problems where a
+single straight line (or plane) can separate the data.
 
-本脚本演示三件事：
-  1. 感知机成功学会 AND（与门）——线性可分
-  2. 感知机成功学会 OR（或门） ——线性可分
-  3. 感知机学不会 XOR（异或）——线性不可分（这正是后来神经网络
-     需要加隐藏层、发展成多层感知机的原因）
+This script demonstrates three things:
+  1. The perceptron successfully learns AND (the AND gate)  — linearly separable
+  2. The perceptron successfully learns OR  (the OR gate)   — linearly separable
+  3. The perceptron FAILS to learn XOR (the XOR gate) — linearly inseparable,
+     which is exactly why hidden layers and multi-layer perceptrons
+     were later invented
 
-运行方式：  python perceptron.py
+Run it with:  python perceptron.py
 """
 
 import random
 
 
 class Perceptron:
-    """单层感知机：输入向量 x -> 加权求和 -> 阈值判断 -> 输出 0/1"""
+    """A single-layer perceptron: input vector x -> weighted sum -> threshold -> 0/1"""
 
     def __init__(self, n_inputs, seed=None):
-        # 用独立的 Random 实例，避免影响全局随机状态
+        # Use a dedicated Random instance so the global RNG state stays untouched
         rng = random.Random(seed)
-        # 权重随机初始化，偏置初始为 0
+        # Randomly initialize weights; the bias starts at 0
         self.weights = [rng.uniform(-0.5, 0.5) for _ in range(n_inputs)]
         self.bias = 0.0
 
-    # 前向计算：加权和 + 偏置，大于 0 输出 1，否则输出 0
+    # Forward pass: weighted sum + bias; output 1 if > 0, otherwise 0
     def predict(self, x):
         s = sum(w * xi for w, xi in zip(self.weights, x)) + self.bias
         return 1 if s > 0 else 0
 
-    # 训练一个样本：预测错了才更新权重
-    # 更新规则：w = w + lr * (真实值 - 预测值) * x
+    # Train on one sample: only update weights when the prediction is wrong.
+    # Update rule: w = w + lr * (true label - predicted label) * x
     def train_step(self, x, target, lr):
         pred = self.predict(x)
-        error = target - pred  # 只有错误时才非 0
+        error = target - pred  # Non-zero only when the prediction is wrong
         if error != 0:
             for i in range(len(self.weights)):
                 self.weights[i] += lr * error * x[i]
             self.bias += lr * error
 
-    # 完整训练：把所有样本反复过很多轮，直到全部正确或达到上限
+    # Full training: loop over all samples many times until every one is
+    # correct or the epoch limit is reached
     def train(self, data, lr=0.1, max_epochs=200):
         for epoch in range(1, max_epochs + 1):
-            # 先过一遍所有样本，更新权重
+            # First pass through all samples and update the weights
             for x, target in data:
                 self.train_step(x, target, lr)
-            # 本轮结束时，对全部样本统一评估一次，全对才算收敛
-            # （不能边更新边判断——同轮内前面学对的样本可能又被后面的样本改错）
+            # At the END of the epoch, evaluate ALL samples once; the model is
+            # converged only if every sample is correct. Never judge mid-epoch —
+            # a sample fixed earlier in the same epoch can be broken again by
+            # a later sample.
             errors = sum(1 for x, target in data if self.predict(x) != target)
             if errors == 0:
                 return epoch
-        return None  # 达到上限仍未收敛（说明数据线性不可分）
+        return None  # Still not converged after the limit (data is linearly inseparable)
 
 
 def run_logic_gate(name, data):
-    """在某个逻辑门上训练感知机并输出结果"""
+    """Train a perceptron on one logic gate and print the result"""
     p = Perceptron(n_inputs=2, seed=7)
     epochs = p.train(data, lr=0.1, max_epochs=500)
 
-    print(f"\n【{name}】")
+    print(f"\n[{name}]")
     if epochs is None:
-        print("  训练 500 轮仍未收敛 —— 数据线性不可分，感知机学不会！")
+        print("  Did not converge after 500 epochs — the data is linearly inseparable,")
+        print("  so a single-layer perceptron cannot learn it!")
     else:
-        print(f"  训练 {epochs} 轮后收敛 ✔")
+        print(f"  Converged after {epochs} epochs OK")
         ok = 0
         for x, target in data:
             pred = p.predict(x)
-            flag = "✔" if pred == target else "✘"
+            flag = "OK" if pred == target else "FAIL"
             if pred == target:
                 ok += 1
-            print(f"  输入 {x} -> 期望 {target}，实际 {pred} {flag}")
-        print(f"  权重 = {[round(w, 3) for w in p.weights]}，偏置 = {round(p.bias, 3)}")
-        print(f"  准确率：{ok}/{len(data)}")
+            print(f"  input {x} -> expected {target}, got {pred} {flag}")
+        print(f"  weights = {[round(w, 3) for w in p.weights]}, bias = {round(p.bias, 3)}")
+        print(f"  accuracy: {ok}/{len(data)}")
 
 
 def main():
-    # AND：只有两个输入都是 1 时输出 1
+    # AND: output is 1 only when both inputs are 1
     and_data = [([0, 0], 0), ([0, 1], 0), ([1, 0], 0), ([1, 1], 1)]
-    # OR：只要有一个输入是 1 就输出 1
+    # OR: output is 1 when at least one input is 1
     or_data = [([0, 0], 0), ([0, 1], 1), ([1, 0], 1), ([1, 1], 1)]
-    # XOR：两个输入不同才输出 1
+    # XOR: output is 1 only when the two inputs differ
     xor_data = [([0, 0], 0), ([0, 1], 1), ([1, 0], 1), ([1, 1], 0)]
 
-    print("=" * 55)
-    print("单层感知机学习逻辑门：AND / OR 应该能学会，XOR 学不会")
-    print("=" * 55)
+    print("=" * 60)
+    print("A single-layer perceptron learning logic gates: AND / OR should work, XOR should fail")
+    print("=" * 60)
 
-    run_logic_gate("AND（与门）", and_data)
-    run_logic_gate("OR（或门）", or_data)
-    run_logic_gate("XOR（异或）", xor_data)
+    run_logic_gate("AND", and_data)
+    run_logic_gate("OR", or_data)
+    run_logic_gate("XOR", xor_data)
 
-    print("\n" + "=" * 55)
-    print("结论：")
-    print("  AND/OR 在平面上可以用一条直线分开（线性可分），感知机可收敛；")
-    print("  XOR 用一条直线永远分不开（线性不可分），所以需要多层网络。")
-    print("  试试运行 nn_xor.py，看两层神经网络如何解决这个问题！")
-    print("=" * 55)
+    print("\n" + "=" * 60)
+    print("Conclusion:")
+    print("  AND/OR can be separated by a straight line (linearly separable),")
+    print("  so the perceptron converges; XOR can never be separated by one line")
+    print("  (linearly inseparable), so a multi-layer network is required.")
+    print("  Now run nn_xor.py to see how a two-layer neural network solves it!")
+    print("=" * 60)
 
 
 if __name__ == "__main__":
