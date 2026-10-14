@@ -1,0 +1,11 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 系统文件
+Thumbs.db
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
